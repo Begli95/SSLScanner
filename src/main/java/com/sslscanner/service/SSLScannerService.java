@@ -4,7 +4,6 @@ import org.apache.http.ParseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.BasicHttpContext;
 
 import java.io.IOException;
@@ -103,8 +102,6 @@ public class SSLScannerService implements Runnable {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private boolean isLocalAddress(String address) {

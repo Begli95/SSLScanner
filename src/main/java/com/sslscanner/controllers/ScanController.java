@@ -1,10 +1,7 @@
 package com.sslscanner.controllers;
 
 import com.sslscanner.service.IpRangeSplitterService;
-import com.sslscanner.service.SSLScannerService;
 import io.javalin.http.Handler;
-
-import java.util.List;
 import java.util.Objects;
 
 public class ScanController {
