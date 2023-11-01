@@ -9,11 +9,10 @@ import java.util.Objects;
 
 public class ScanController {
     public static Handler scanHandler = ctx -> {
-        // Получите значения из формы
+
         String ipRange = ctx.formParam("ipRange");
         int numThreads = Integer.parseInt(Objects.requireNonNull(ctx.formParam("numThreads")));
 
-        //SSLScannerService.scan(ipRange, numThreads);
         IpRangeSplitterService.execute(ipRange, numThreads);
 
         ctx.result("Scanning in progress. Check the results later.");

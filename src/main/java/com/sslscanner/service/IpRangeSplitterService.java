@@ -1,8 +1,16 @@
 package com.sslscanner.service;
 
+import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.conn.ManagedHttpClientConnection;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpCoreContext;
+
+import javax.net.ssl.SSLSession;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -23,6 +31,7 @@ public class IpRangeSplitterService {
                 InetAddress inetThreadStart = longToIP(threadStart);
                 InetAddress inetThreadEnd = longToIP(threadEnd);
                 String range = inetThreadStart.getHostAddress() + "-" + inetThreadEnd.getHostAddress();
+                System.out.println("ip "+range);
                 ipRanges.add(range);
             }
         } catch (UnknownHostException e) {
@@ -55,6 +64,8 @@ public class IpRangeSplitterService {
     }
 
     public static void execute(String ipRange, int numThreads){
+        final String PEER_CERTIFICATES = "PEER_CERTIFICATES";
+        final String PEER_DOMAIN = "PEER_DOMAIN";
 
         String[] ipAndMask = ipRange.split("/");
 
@@ -65,11 +76,24 @@ public class IpRangeSplitterService {
 
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
-        int i = 1;
+        HttpResponseInterceptor certificateInterceptor = (httpResponse, context) -> {
+            ManagedHttpClientConnection routedConnection = (ManagedHttpClientConnection) context.getAttribute(HttpCoreContext.HTTP_CONNECTION);
+            SSLSession sslSession = routedConnection.getSSLSession();
+            if (sslSession != null) {
+                Certificate[] certificates = sslSession.getPeerCertificates();
+                context.setAttribute(PEER_CERTIFICATES, certificates);
+            } else {
+                context.setAttribute(PEER_DOMAIN, ipAddress);
+            }
+        };
+
+        CloseableHttpClient sharedHttpClient = HttpClients
+                .custom()
+                .addInterceptorLast(certificateInterceptor)
+                .build();
+
         for (String ip : ipRanges) {
-            // Запускаем задачу сканирования с заданным диапазоном
-            executorService.execute(new SSLScannerService(ip,i));
-            i++;
+            executorService.execute(new SSLScannerService(ip, sharedHttpClient));
         }
         executorService.shutdown();
     }
