@@ -12,14 +12,16 @@ import java.net.UnknownHostException;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
-public class SSLScannerService implements Runnable {
+public class SSLScannerJob implements Runnable {
+
     private final String ipRange;
     private final CloseableHttpClient sharedHttpClient;
 
-    public SSLScannerService(String ipRange, CloseableHttpClient sharedHttpClient) {
+    public SSLScannerJob(String ipRange, CloseableHttpClient sharedHttpClient) {
         this.ipRange = ipRange;
         this.sharedHttpClient = sharedHttpClient;
     }
+
 
     public void scan() throws IOException, ParseException {
         final String PEER_CERTIFICATES = "PEER_CERTIFICATES";
@@ -104,7 +106,7 @@ public class SSLScannerService implements Runnable {
         }
     }
 
-    private boolean isLocalAddress(String address) {
+    private static boolean isLocalAddress(String address) {
         try {
             InetAddress inetAddress = InetAddress.getByName(address);
             return inetAddress.isSiteLocalAddress() || inetAddress.isLinkLocalAddress();

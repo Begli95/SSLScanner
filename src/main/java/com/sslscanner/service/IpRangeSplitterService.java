@@ -93,7 +93,14 @@ public class IpRangeSplitterService {
                 .build();
 
         for (String ip : ipRanges) {
-            executorService.execute(new SSLScannerService(ip, sharedHttpClient));
+            executorService.execute(() -> {
+                try {
+                    SSLScannerJob sslScanner = new SSLScannerJob(ipRange, sharedHttpClient);
+                    sslScanner.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
         executorService.shutdown();
     }
