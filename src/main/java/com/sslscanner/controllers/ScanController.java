@@ -1,7 +1,10 @@
 package com.sslscanner.controllers;
 
+import com.sslscanner.service.IpRangeSplitterService;
 import com.sslscanner.service.SSLScannerService;
 import io.javalin.http.Handler;
+
+import java.util.List;
 import java.util.Objects;
 
 public class ScanController {
@@ -10,10 +13,9 @@ public class ScanController {
         String ipRange = ctx.formParam("ipRange");
         int numThreads = Integer.parseInt(Objects.requireNonNull(ctx.formParam("numThreads")));
 
-        // Вызов службы для выполнения сканирования
-        SSLScannerService.scan(ipRange, numThreads);
+        //SSLScannerService.scan(ipRange, numThreads);
+        IpRangeSplitterService.execute(ipRange, numThreads);
 
-        // Отправка сообщения об успешном сканировании
         ctx.result("Scanning in progress. Check the results later.");
     };
 }

@@ -4,6 +4,8 @@ import com.sslscanner.controllers.HomeController;
 import com.sslscanner.controllers.ScanController;
 import io.javalin.Javalin;
 
+import java.util.List;
+
 
 public class Main {
     public static void main(String[] args) {
