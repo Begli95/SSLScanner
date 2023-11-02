@@ -7,6 +7,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpCoreContext;
 
 import javax.net.ssl.SSLSession;
+import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -31,7 +32,6 @@ public class IpRangeSplitterService {
                 InetAddress inetThreadStart = longToIP(threadStart);
                 InetAddress inetThreadEnd = longToIP(threadEnd);
                 String range = inetThreadStart.getHostAddress() + "-" + inetThreadEnd.getHostAddress();
-                System.out.println("ip "+range);
                 ipRanges.add(range);
             }
         } catch (UnknownHostException e) {
@@ -63,7 +63,7 @@ public class IpRangeSplitterService {
         }
     }
 
-    public static void execute(String ipRange, int numThreads){
+    public static void execute(String ipRange, int numThreads) throws IOException {
         final String PEER_CERTIFICATES = "PEER_CERTIFICATES";
         final String PEER_DOMAIN = "PEER_DOMAIN";
 
@@ -93,14 +93,7 @@ public class IpRangeSplitterService {
                 .build();
 
         for (String ip : ipRanges) {
-            executorService.execute(() -> {
-                try {
-                    SSLScannerJob sslScanner = new SSLScannerJob(ipRange, sharedHttpClient);
-                    sslScanner.run();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+            executorService.execute(new SSLScannerJob(ip, sharedHttpClient));
         }
         executorService.shutdown();
     }
